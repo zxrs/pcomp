@@ -12,7 +12,7 @@ use img::Img;
 pub struct Config {
     max_length: usize,
     quality: f32,
-    sharpness: i16
+    sharpness: u8
 }
 
 pub struct App {

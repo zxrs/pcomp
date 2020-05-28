@@ -4,5 +4,5 @@ max_length = 1280
 # 0.0 ~ 100.0%
 quality = 75.0
 
-# -256 ~ 255
-sharpness = 255
+# 0 ~ 3
+sharpness = 1

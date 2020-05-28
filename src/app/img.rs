@@ -47,10 +47,13 @@ impl<'a> Img<'a> {
     }
 
     pub fn sharpen(&mut self) -> Result<()> {
-        println!("{}", self.config.sharpness);
-        let sharpness = ((self.config.sharpness / i16::MAX) as f32 * i32::MAX as f32) as i32;
-        println!("{}", sharpness);
-        self.img = self.img.unsharpen(1.0, sharpness);
+        if self.config.sharpness > 0 && self.config.sharpness <= 3 {
+            let force = self.config.sharpness as f32;
+            self.img = self.img.filter3x3(&[
+                0.0,         -1.0 * force,          0.0,
+                -1.0 * force, (4.0 * force) + 1.0, -1.0 * force,
+                0.0,         -1.0 * force,          0.0]);
+        }
         Ok(())
     }
 
