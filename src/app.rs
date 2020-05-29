@@ -14,6 +14,7 @@ pub struct Config {
     quality: f32,
     sharpness: u8,
     brightness: i8,
+    contrast: f32,
 }
 
 pub struct App {
@@ -81,8 +82,9 @@ impl App {
 
     fn process(&self, path: &Path) -> Result<()> {
         let mut img = Img::open(&self.config, path, &self.target_dir)?;
-        img.sharpen();
+        img.contrast();
         img.brighten();
+        img.sharpen();
         img.resize();
         img.compress()?;
         img.save()?;

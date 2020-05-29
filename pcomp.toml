@@ -9,3 +9,6 @@ sharpness = 1
 
 # -128 ~ 127
 brightness = 10
+
+# -100.0 ~ 100.0%
+contrast = 10.0
