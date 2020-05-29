@@ -9,7 +9,6 @@ use std::path::Path;
 pub struct Img<'a> {
     img: DynamicImage,
     config: &'a Config,
-    path: &'a Path,
     file_name: String,
     target_dir: &'a Path,
     target_width: usize,
@@ -37,7 +36,6 @@ impl<'a> Img<'a> {
         Ok(Img {
             img,
             config,
-            path,
             file_name,
             target_dir,
             target_width: 0,
@@ -46,7 +44,11 @@ impl<'a> Img<'a> {
         })
     }
 
-    pub fn sharpen(&mut self) -> Result<()> {
+    pub fn brighten(&mut self) {
+        self.img = self.img.brighten(self.config.brightness as i32);
+    }
+
+    pub fn sharpen(&mut self) {
         if self.config.sharpness > 0 && self.config.sharpness <= 3 {
             let force = self.config.sharpness as f32;
             self.img = self.img.filter3x3(&[
@@ -54,10 +56,9 @@ impl<'a> Img<'a> {
                 -1.0 * force, (4.0 * force) + 1.0, -1.0 * force,
                 0.0,         -1.0 * force,          0.0]);
         }
-        Ok(())
     }
 
-    pub fn resize(&mut self) -> Result<()> {
+    pub fn resize(&mut self) {
         let width = self.img.width() as usize;
         let height = self.img.height() as usize;
 
@@ -85,7 +86,6 @@ impl<'a> Img<'a> {
             )
             .to_rgb()
             .to_vec();
-        Ok(())
     }
 
     pub fn compress(&mut self) -> Result<()> {

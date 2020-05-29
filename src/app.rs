@@ -12,7 +12,8 @@ use img::Img;
 pub struct Config {
     max_length: usize,
     quality: f32,
-    sharpness: u8
+    sharpness: u8,
+    brightness: i8,
 }
 
 pub struct App {
@@ -80,9 +81,9 @@ impl App {
 
     fn process(&self, path: &Path) -> Result<()> {
         let mut img = Img::open(&self.config, path, &self.target_dir)?;
-        //img.brighten()?;
-        img.sharpen()?;
-        img.resize()?;
+        img.sharpen();
+        img.brighten();
+        img.resize();
         img.compress()?;
         img.save()?;
         Ok(())

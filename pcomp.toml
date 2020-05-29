@@ -6,3 +6,6 @@ quality = 75.0
 
 # 0 ~ 3
 sharpness = 1
+
+# -128 ~ 127
+brightness = 10
