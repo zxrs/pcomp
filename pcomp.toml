@@ -4,8 +4,8 @@ max_length = 1600
 # 0.0 ~ 100.0%
 quality = 65.0
 
-# 0 ~ 3
-sharpness = 1
+# 0 ~ 100
+sharpness = 25
 
 # -128 ~ 127
 brightness = 10

@@ -57,13 +57,13 @@ impl<'a> Img<'a> {
             let force = self.config.sharpness as f32;
             self.img = self.img.filter3x3(&[
                 0.0,
-                -1.0 * force,
+                -0.02 * force,
                 0.0,
-                -1.0 * force,
-                (4.0 * force) + 1.0,
-                -1.0 * force,
+                -0.02 * force,
+                (0.08 * force) + 1.0,
+                -0.02 * force,
                 0.0,
-                -1.0 * force,
+                -0.02 * force,
                 0.0,
             ]);
         }
