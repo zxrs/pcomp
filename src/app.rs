@@ -82,10 +82,10 @@ impl App {
 
     fn process(&self, path: &Path) -> Result<()> {
         let mut img = Img::open(&self.config, path, &self.target_dir)?;
+        img.resize();
         img.contrast();
         img.brighten();
         img.sharpen();
-        img.resize();
         img.compress()?;
         img.save()?;
         Ok(())
