@@ -56,9 +56,16 @@ impl<'a> Img<'a> {
         if self.config.sharpness > 0 && self.config.sharpness <= 3 {
             let force = self.config.sharpness as f32;
             self.img = self.img.filter3x3(&[
-                0.0,         -1.0 * force,          0.0,
-                -1.0 * force, (4.0 * force) + 1.0, -1.0 * force,
-                0.0,         -1.0 * force,          0.0]);
+                0.0,
+                -1.0 * force,
+                0.0,
+                -1.0 * force,
+                (4.0 * force) + 1.0,
+                -1.0 * force,
+                0.0,
+                -1.0 * force,
+                0.0,
+            ]);
         }
     }
 
@@ -81,15 +88,11 @@ impl<'a> Img<'a> {
             self.target_height = height;
         }
 
-        self.buf = self
-            .img
-            .resize(
-                self.target_width as u32,
-                self.target_height as u32,
-                FilterType::Lanczos3,
-            )
-            .to_rgb()
-            .to_vec();
+        self.img = self.img.resize(
+            self.target_width as u32,
+            self.target_height as u32,
+            FilterType::Lanczos3,
+        );
     }
 
     pub fn compress(&mut self) -> Result<()> {
@@ -102,15 +105,16 @@ impl<'a> Img<'a> {
         comp.set_mem_dest();
         comp.start_compress();
 
+        let buf = self.img.to_rgb().to_vec();
+        let width = self.img.width() as usize;
+        let height = self.img.height() as usize;
+
         let mut line = 0;
         loop {
-            if line > self.target_height - 1 {
+            if line > height - 1 {
                 break;
             }
-            //&resized_img_data.
-            comp.write_scanlines(
-                &self.buf[line * self.target_width * 3..(line + 1) * self.target_width * 3],
-            );
+            comp.write_scanlines(&buf[line * width * 3..(line + 1) * width * 3]);
             line += 1;
         }
         comp.finish_compress();

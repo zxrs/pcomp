@@ -1,2 +1,3 @@
 [alias]
 r = "rustc --release -- -Clto=fat -Cpanic=abort -Ccodegen-units=1 -Ctarget-cpu=native"
+#r = "rustc --release"

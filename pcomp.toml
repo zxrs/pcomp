@@ -1,8 +1,8 @@
 # px
-max_length = 1280
+max_length = 1600
 
 # 0.0 ~ 100.0%
-quality = 75.0
+quality = 65.0
 
 # 0 ~ 3
 sharpness = 1
