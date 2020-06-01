@@ -53,7 +53,7 @@ impl<'a> Img<'a> {
     }
 
     pub fn sharpen(&mut self) {
-        if self.config.sharpness > 0 && self.config.sharpness <= 3 {
+        if self.config.sharpness > 0 && self.config.sharpness <= 100 {
             let force = self.config.sharpness as f32;
             self.img = self.img.filter3x3(&[
                 0.0,
