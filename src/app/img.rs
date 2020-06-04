@@ -53,20 +53,25 @@ impl<'a> Img<'a> {
     }
 
     pub fn sharpen(&mut self) {
-        if self.config.sharpness > 0 && self.config.sharpness <= 100 {
-            let force = self.config.sharpness as f32;
-            self.img = self.img.filter3x3(&[
-                0.0,
-                -0.02 * force,
-                0.0,
-                -0.02 * force,
-                (0.08 * force) + 1.0,
-                -0.02 * force,
-                0.0,
-                -0.02 * force,
-                0.0,
-            ]);
+        if self.config.sharpness > 0 && self.config.sharpness <= 3 {
+            for _ in 0..self.config.sharpness {
+                self.img = self.img.unsharpen(1.0, 10);
+            }
         }
+        // if self.config.sharpness > 0 && self.config.sharpness <= 100 {
+        //     let force = self.config.sharpness as f32;
+        //     self.img = self.img.filter3x3(&[
+        //         0.0,
+        //         -0.02 * force,
+        //         0.0,
+        //         -0.02 * force,
+        //         (0.08 * force) + 1.0,
+        //         -0.02 * force,
+        //         0.0,
+        //         -0.02 * force,
+        //         0.0,
+        //     ]);
+        // }
     }
 
     pub fn resize(&mut self) {
