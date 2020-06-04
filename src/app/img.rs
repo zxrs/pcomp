@@ -96,18 +96,18 @@ impl<'a> Img<'a> {
     }
 
     pub fn compress(&mut self) -> Result<()> {
+        let width = self.img.width() as usize;
+        let height = self.img.height() as usize;
+        let buf = self.img.to_rgb().to_vec();
+
         let mut comp = Compress::new(ColorSpace::JCS_RGB);
         comp.set_scan_optimization_mode(ScanMode::AllComponentsTogether);
         comp.set_quality(self.config.quality);
 
-        comp.set_size(self.target_width, self.target_height);
+        comp.set_size(width, height);
 
         comp.set_mem_dest();
         comp.start_compress();
-
-        let buf = self.img.to_rgb().to_vec();
-        let width = self.img.width() as usize;
-        let height = self.img.height() as usize;
 
         let mut line = 0;
         loop {
