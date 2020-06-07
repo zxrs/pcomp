@@ -1,6 +1,5 @@
 use anyhow::{anyhow, bail, Result};
 use rayon::prelude::*;
-use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -8,14 +7,8 @@ use std::path::{Path, PathBuf};
 mod img;
 use img::Img;
 
-#[derive(Deserialize)]
-pub struct Config {
-    max_length: usize,
-    quality: f32,
-    sharpness: u8,
-    brightness: i8,
-    contrast: f32,
-}
+mod config;
+use config::Config;
 
 pub struct App {
     target_dir: PathBuf,

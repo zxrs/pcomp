@@ -53,10 +53,8 @@ impl<'a> Img<'a> {
     }
 
     pub fn sharpen(&mut self) {
-        if self.config.sharpness > 0 && self.config.sharpness <= 3 {
-            for _ in 0..self.config.sharpness {
-                self.img = self.img.unsharpen(1.0, 10);
-            }
+        if self.config.sharpness.enable {
+            self.img = self.img.unsharpen(self.config.sharpness.sigma, self.config.sharpness.threshold);
         }
         // if self.config.sharpness > 0 && self.config.sharpness <= 100 {
         //     let force = self.config.sharpness as f32;
