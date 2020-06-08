@@ -45,7 +45,9 @@ impl<'a> Img<'a> {
     }
 
     pub fn brighten(&mut self) {
-        self.img = self.img.brighten(self.config.brightness as i32);
+        if self.config.brightness.enable {
+            self.img = self.img.brighten(self.config.brightness.setting as i32);
+        }
     }
 
     pub fn sharpen(&mut self) {

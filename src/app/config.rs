@@ -5,7 +5,7 @@ pub struct Config {
     pub quality: f32,
     pub resize: Resize,
     pub sharpness: Sharpness,
-    pub brightness: i8,
+    pub brightness: Brightness,
     pub contrast: f32,
 }
 
@@ -20,4 +20,10 @@ pub struct Sharpness {
     pub enable: bool,
     pub sigma: f32,
     pub threshold: i32,
+}
+
+#[derive(Deserialize)]
+pub struct Brightness {
+    pub enable: bool,
+    pub setting: i8,
 }

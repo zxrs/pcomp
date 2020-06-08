@@ -1,16 +1,18 @@
-# px
-max_length = 1600
-
 # 0.0 ~ 100.0%
 quality = 65.0
 
-# -128 ~ 127
-brightness = 0
-
 # -100.0 ~ 100.0%
 contrast = 0.0
+
+[resize]
+enable = true
+long_side_length = 1600
 
 [sharpness]
 enable = true
 sigma = 2.0
 threshold = 10
+
+[brightness]
+enable = true
+setting = 10    # -128 ~ 127
