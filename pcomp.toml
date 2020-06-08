@@ -4,11 +4,13 @@ max_length = 1600
 # 0.0 ~ 100.0%
 quality = 65.0
 
-# 0 ~ 3
-sharpness = 1
-
 # -128 ~ 127
 brightness = 0
 
 # -100.0 ~ 100.0%
 contrast = 0.0
+
+[sharpness]
+enable = true
+sigma = 2.0
+threshold = 10

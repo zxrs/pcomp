@@ -54,48 +54,20 @@ impl<'a> Img<'a> {
 
     pub fn sharpen(&mut self) {
         if self.config.sharpness.enable {
-            self.img = self.img.unsharpen(self.config.sharpness.sigma, self.config.sharpness.threshold);
+            self.img = self
+                .img
+                .unsharpen(self.config.sharpness.sigma, self.config.sharpness.threshold);
         }
-        // if self.config.sharpness > 0 && self.config.sharpness <= 100 {
-        //     let force = self.config.sharpness as f32;
-        //     self.img = self.img.filter3x3(&[
-        //         0.0,
-        //         -0.02 * force,
-        //         0.0,
-        //         -0.02 * force,
-        //         (0.08 * force) + 1.0,
-        //         -0.02 * force,
-        //         0.0,
-        //         -0.02 * force,
-        //         0.0,
-        //     ]);
-        // }
     }
 
     pub fn resize(&mut self) {
-        let width = self.img.width() as usize;
-        let height = self.img.height() as usize;
-
-        if width > self.config.max_length || height > self.config.max_length {
-            if width > height {
-                let ratio: f32 = self.config.max_length as f32 / width as f32;
-                self.target_width = self.config.max_length;
-                self.target_height = (height as f32 * ratio) as usize;
-            } else {
-                let ratio: f32 = self.config.max_length as f32 / height as f32;
-                self.target_width = (width as f32 * ratio) as usize;
-                self.target_height = self.config.max_length;
-            }
-        } else {
-            self.target_width = width;
-            self.target_height = height;
+        if self.config.resize.enable {
+            self.img = self.img.resize(
+                self.config.resize.long_side_length as u32,
+                self.config.resize.long_side_length as u32,
+                FilterType::Lanczos3,
+            );
         }
-
-        self.img = self.img.resize(
-            self.target_width as u32,
-            self.target_height as u32,
-            FilterType::Lanczos3,
-        );
     }
 
     pub fn compress(&mut self) -> Result<()> {
