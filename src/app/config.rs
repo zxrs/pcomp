@@ -13,6 +13,7 @@ pub struct Config {
 pub struct General {
     pub jpeg_quality: f32,
     pub read_sub_dir: bool,
+    pub num_threads: usize,
 }
 
 #[derive(Deserialize)]

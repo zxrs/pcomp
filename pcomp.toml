@@ -1,6 +1,7 @@
 [general]
 jpeg_quality = 70.0 # 0.0 ~ 100.0%
 read_sub_dir = true
+num_threads = 4
 
 [resize]
 enable = true

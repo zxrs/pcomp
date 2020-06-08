@@ -65,10 +65,16 @@ impl App {
             fs::create_dir(&self.target_dir)?;
         }
 
-        self.files.par_iter().for_each(|path| {
-            if let Err(e) = self.process(path) {
-                println!("{}", e);
-            }
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(self.config.general.num_threads)
+            .build()?;
+        
+        pool.install(|| {
+            self.files.par_iter().for_each(|path| {
+                if let Err(e) = self.process(path) {
+                    println!("{}", e);
+                }
+            });
         });
         Ok(())
     }
@@ -84,4 +90,3 @@ impl App {
         Ok(())
     }
 }
-
