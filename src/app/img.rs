@@ -41,7 +41,9 @@ impl<'a> Img<'a> {
     }
 
     pub fn contrast(&mut self) {
-        self.img = self.img.adjust_contrast(self.config.contrast);
+        if self.config.contrast.enable {
+            self.img = self.img.adjust_contrast(self.config.contrast.setting);
+        }
     }
 
     pub fn brighten(&mut self) {
