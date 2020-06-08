@@ -1,7 +1,7 @@
 use super::Config;
 use anyhow::{anyhow, bail, Result};
-use image::{self, imageops::FilterType, DynamicImage, GenericImageView};
-use mozjpeg::{ColorSpace, Compress, ScanMode};
+use image::{self, imageops::FilterType, DynamicImage, GenericImageView, RgbImage};
+use mozjpeg::{ColorSpace, Compress, Decompress, ScanMode};
 use std::fs;
 use std::io::{prelude::*, BufWriter};
 use std::path::Path;
@@ -29,7 +29,26 @@ impl<'a> Img<'a> {
                 bail!("{} is not jpeg file.", &file_name);
             }
         }
-        let img = image::open(path)?;
+
+        let (data, width, height) = {
+            let comp_data = fs::read(path)?;
+            let mut d = Decompress::new_mem(&comp_data)?.rgb()?;
+            let width = d.width() as u32;
+            let height = d.height() as u32;
+            let data = d
+                .read_scanlines::<[u8; 3]>()
+                .ok_or(anyhow!("read_scanlines is none."))?
+                .iter()
+                .flatten()
+                .cloned()
+                .collect::<Vec<_>>();
+            d.finish_decompress();
+            (data, width, height)
+        };
+
+        let image_buffer = RgbImage::from_raw(width, height, data)
+            .ok_or(anyhow!("RgbImage::from_raw is none"))?;
+        let img = DynamicImage::ImageRgb8(image_buffer);
 
         Ok(Img {
             img,
