@@ -96,10 +96,8 @@ impl<'a> Img<'a> {
 
         let mut comp = Compress::new(ColorSpace::JCS_RGB);
         comp.set_scan_optimization_mode(ScanMode::AllComponentsTogether);
-        comp.set_quality(self.config.quality);
-
+        comp.set_quality(self.config.general.jpeg_quality);
         comp.set_size(width, height);
-
         comp.set_mem_dest();
         comp.start_compress();
 

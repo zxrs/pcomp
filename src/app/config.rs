@@ -2,11 +2,17 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Config {
-    pub quality: f32,
+    pub general: General,
     pub resize: Resize,
     pub sharpness: Sharpness,
     pub brightness: Brightness,
     pub contrast: Contrast,
+}
+
+#[derive(Deserialize)]
+pub struct General {
+    pub jpeg_quality: f32,
+    pub read_sub_dir: bool,
 }
 
 #[derive(Deserialize)]
