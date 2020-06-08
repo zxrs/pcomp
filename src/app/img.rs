@@ -11,8 +11,6 @@ pub struct Img<'a> {
     config: &'a Config,
     file_name: String,
     target_dir: &'a Path,
-    target_width: usize,
-    target_height: usize,
     buf: Vec<u8>,
 }
 
@@ -38,8 +36,6 @@ impl<'a> Img<'a> {
             config,
             file_name,
             target_dir,
-            target_width: 0,
-            target_height: 0,
             buf: vec![],
         })
     }
