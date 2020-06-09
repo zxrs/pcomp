@@ -1,5 +1,5 @@
 use super::Config;
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, Result};
 use image::{self, imageops::FilterType, DynamicImage, GenericImageView, RgbImage};
 use mozjpeg::{ColorSpace, Compress, Decompress, ScanMode};
 use std::fs;
@@ -109,12 +109,17 @@ impl<'a> Img<'a> {
             self.path.to_owned()
         } else {
             let file_name = self.path.file_name().ok_or(anyhow!("no file name"))?;
-            self.path.join("../compressed").join(file_name)
+            let parent = self.path.parent().ok_or(anyhow!("no parent dir"))?;
+            let compressed_dir = parent.join("compressed");
+            if !compressed_dir.exists() {
+                fs::create_dir(&compressed_dir)?;
+            }
+            compressed_dir.join(file_name)
         };
         let mut file = BufWriter::new(fs::File::create(outfile)?);
         file.write_all(&self.buf)?;
-        
-        let ratio = (self.origin_size as f32 / self.buf.len() as f32 * 100.0) as u8;
+
+        let ratio = (self.buf.len() as f32 / self.origin_size as f32 * 100.0) as u8;
         Ok(ratio)
     }
 }

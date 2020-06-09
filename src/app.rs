@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use rayon::prelude::*;
 use std::env;
 use std::fs;
@@ -35,12 +35,12 @@ impl App {
             self.files.par_iter().for_each(|path| {
                 if let Some(file_name) = path.file_name() {
                     let file_name = file_name.to_string_lossy();
-                    match self.process(path, &file_name) {
+                    match self.process(path) {
                         Ok(ratio) => println!(
                             "{:>13} has been compressed to {:>2}% of its original size.",
                             file_name, ratio
                         ),
-                        Err(e) => println!("{:>?} fails to compress due to \"{}\".", file_name, e),
+                        Err(e) => println!("{:>13} fails to compress due to \"{}\".", file_name, e),
                     }
                 }
             });
@@ -48,7 +48,7 @@ impl App {
         Ok(())
     }
 
-    fn process(&self, path: &Path, file_name: &str) -> Result<u8> {
+    fn process(&self, path: &Path) -> Result<u8> {
         if let Some(ext) = path.extension() {
             if !ext.to_string_lossy().as_ref().to_lowercase().eq("jpg")
                 && !ext.to_string_lossy().as_ref().to_lowercase().eq("jpeg")
@@ -76,11 +76,9 @@ fn read_arg(arg: String, config: &Config) -> Option<Vec<PathBuf>> {
             let entry = entry.ok()?;
             let file_type = entry.file_type().ok()?;
             if file_type.is_dir() && config.general.read_sub_dir {
-                read_sub_dir(&path, &mut v).ok()?;
+                read_sub_dir(&entry.path(), &mut v).ok()?;
             } else if file_type.is_file() {
                 v.push(entry.path());
-            } else {
-                return None;
             }
         }
         Some(v)
@@ -97,7 +95,7 @@ fn read_sub_dir(path: &Path, v: &mut Vec<PathBuf>) -> Result<()> {
         let entry = entry?;
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
-            read_sub_dir(path, v)?;
+            read_sub_dir(&entry.path(), v)?;
         } else if file_type.is_file() {
             v.push(entry.path());
         }
