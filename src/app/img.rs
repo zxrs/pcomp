@@ -9,41 +9,28 @@ use std::path::Path;
 pub struct Img<'a> {
     img: DynamicImage,
     config: &'a Config,
-    file_name: String,
-    target_dir: &'a Path,
+    path: &'a Path,
     buf: Vec<u8>,
+    origin_size: usize,
 }
 
 impl<'a> Img<'a> {
-    pub fn open(config: &'a Config, path: &'a Path, target_dir: &'a Path) -> Result<Self> {
-        let file_name = path
-            .file_name()
-            .ok_or(anyhow!("No file name."))?
-            .to_string_lossy()
-            .to_string();
-
-        if let Some(ext) = path.extension() {
-            if !ext.to_string_lossy().as_ref().to_lowercase().eq("jpg")
-                && !ext.to_string_lossy().as_ref().to_lowercase().eq("jpeg")
-            {
-                bail!("{} is not jpeg file.", &file_name);
-            }
-        }
-
-        let (data, width, height) = {
+    pub fn open(config: &'a Config, path: &'a Path) -> Result<Self> {
+        let (data, width, height, origin_size) = {
             let comp_data = fs::read(path)?;
+            let origin_size = comp_data.len();
             let mut d = Decompress::new_mem(&comp_data)?.rgb()?;
             let width = d.width() as u32;
             let height = d.height() as u32;
             let data = d
                 .read_scanlines::<[u8; 3]>()
-                .ok_or(anyhow!("read_scanlines is none."))?
+                .ok_or(anyhow!("read_scanlines is none"))?
                 .iter()
                 .flatten()
                 .cloned()
                 .collect::<Vec<_>>();
             d.finish_decompress();
-            (data, width, height)
+            (data, width, height, origin_size)
         };
 
         let image_buffer = RgbImage::from_raw(width, height, data)
@@ -53,9 +40,9 @@ impl<'a> Img<'a> {
         Ok(Img {
             img,
             config,
-            file_name,
-            target_dir,
+            path,
             buf: vec![],
+            origin_size,
         })
     }
 
@@ -117,13 +104,17 @@ impl<'a> Img<'a> {
         Ok(())
     }
 
-    pub fn save(&self) -> Result<()> {
-        let outfile = self.target_dir.join(&self.file_name);
-
+    pub fn save(&self) -> Result<u8> {
+        let outfile = if self.config.general.overwrite_existing_files {
+            self.path.to_owned()
+        } else {
+            let file_name = self.path.file_name().ok_or(anyhow!("no file name"))?;
+            self.path.join("../compressed").join(file_name)
+        };
         let mut file = BufWriter::new(fs::File::create(outfile)?);
         file.write_all(&self.buf)?;
-
-        println!("{} is compressed!", &self.file_name);
-        Ok(())
+        
+        let ratio = (self.origin_size as f32 / self.buf.len() as f32 * 100.0) as u8;
+        Ok(ratio)
     }
 }

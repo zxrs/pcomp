@@ -2,18 +2,19 @@
 jpeg_quality = 70.0 # 0.0 ~ 100.0%
 read_sub_dir = true
 num_threads = 4
+overwrite_existing_files = false
 
 [resize]
-enable = true
-long_side_length = 1600
+enable = false
+long_side_length = 1920
 
 [sharpness]
-enable = true
+enable = false
 sigma = 2.0
 threshold = 10
 
 [brightness]
-enable = true
+enable = false
 setting = 10    # -128 ~ 127
 
 [contrast]

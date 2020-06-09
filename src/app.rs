@@ -11,82 +11,96 @@ mod config;
 use config::Config;
 
 pub struct App {
-    target_dir: PathBuf,
     files: Vec<PathBuf>,
     config: Config,
 }
 
 impl App {
     pub fn new() -> Result<Self> {
-        let source = env::args()
-            .nth(1)
-            .map(|s| PathBuf::from(s))
-            .ok_or(anyhow!("No source"))?;
-
-        let (target_dir, files) = if source.is_dir() {
-            let target_dir = source.join("compressed");
-            let files: Vec<PathBuf> = fs::read_dir(&source)?
-                .filter_map(|entry| {
-                    let entry = entry.ok()?;
-                    if entry.file_type().ok()?.is_file() {
-                        Some(entry.path())
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            (target_dir, files)
-        } else if source.is_file() {
-            let target_dir = source
-                .parent()
-                .ok_or(anyhow!("No source parent dir."))?
-                .join("compressed");
-            let files: Vec<PathBuf> = env::args()
-                .skip(1)
-                .map(PathBuf::from)
-                .filter(|p| p.is_file())
-                .collect();
-            (target_dir, files)
-        } else {
-            bail!("Invalid source.")
-        };
-
-        let config = toml::from_str(&fs::read_to_string("pcomp.toml")?)?;
-
-        Ok(App {
-            target_dir,
-            files,
-            config,
-        })
+        let config: Config = toml::from_str(&fs::read_to_string("pcomp.toml")?)?;
+        let files = env::args()
+            .skip(1)
+            .filter_map(|arg| read_arg(arg, &config))
+            .flatten()
+            .collect::<Vec<PathBuf>>();
+        Ok(App { files, config })
     }
 
     pub fn start(&self) -> Result<()> {
-        if !self.target_dir.exists() {
-            fs::create_dir(&self.target_dir)?;
-        }
-
         let pool = rayon::ThreadPoolBuilder::new()
             .num_threads(self.config.general.num_threads)
             .build()?;
-        
+
         pool.install(|| {
             self.files.par_iter().for_each(|path| {
-                if let Err(e) = self.process(path) {
-                    println!("{}", e);
+                if let Some(file_name) = path.file_name() {
+                    let file_name = file_name.to_string_lossy();
+                    match self.process(path, &file_name) {
+                        Ok(ratio) => println!(
+                            "{:>13} has been compressed to {:>2}% of its original size.",
+                            file_name, ratio
+                        ),
+                        Err(e) => println!("{:>?} fails to compress due to \"{}\".", file_name, e),
+                    }
                 }
             });
         });
         Ok(())
     }
 
-    fn process(&self, path: &Path) -> Result<()> {
-        let mut img = Img::open(&self.config, path, &self.target_dir)?;
+    fn process(&self, path: &Path, file_name: &str) -> Result<u8> {
+        if let Some(ext) = path.extension() {
+            if !ext.to_string_lossy().as_ref().to_lowercase().eq("jpg")
+                && !ext.to_string_lossy().as_ref().to_lowercase().eq("jpeg")
+            {
+                bail!("not jpeg file.");
+            }
+        }
+
+        let mut img = Img::open(&self.config, path)?;
         img.resize();
         img.contrast();
         img.brighten();
         img.sharpen();
         img.compress()?;
-        img.save()?;
-        Ok(())
+        let ratio = img.save()?;
+        Ok(ratio)
     }
+}
+
+fn read_arg(arg: String, config: &Config) -> Option<Vec<PathBuf>> {
+    let path = PathBuf::from(arg);
+    let mut v = vec![];
+    if path.is_dir() {
+        for entry in fs::read_dir(&path).ok()? {
+            let entry = entry.ok()?;
+            let file_type = entry.file_type().ok()?;
+            if file_type.is_dir() && config.general.read_sub_dir {
+                read_sub_dir(&path, &mut v).ok()?;
+            } else if file_type.is_file() {
+                v.push(entry.path());
+            } else {
+                return None;
+            }
+        }
+        Some(v)
+    } else if path.is_file() {
+        v.push(path);
+        Some(v)
+    } else {
+        None
+    }
+}
+
+fn read_sub_dir(path: &Path, v: &mut Vec<PathBuf>) -> Result<()> {
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let file_type = entry.file_type()?;
+        if file_type.is_dir() {
+            read_sub_dir(path, v)?;
+        } else if file_type.is_file() {
+            v.push(entry.path());
+        }
+    }
+    Ok(())
 }
