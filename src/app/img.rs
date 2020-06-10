@@ -5,7 +5,6 @@ use mozjpeg::{ColorSpace, Compress, Decompress, Marker, ScanMode, ALL_MARKERS};
 use std::fs;
 use std::io::{prelude::*, BufWriter};
 use std::path::Path;
-use std::ptr;
 
 pub struct Img<'a> {
     img: DynamicImage,

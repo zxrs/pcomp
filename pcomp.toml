@@ -6,7 +6,7 @@ overwrite_existing_files = true
 keep_original_exif = true
 
 [resize]
-enable = true
+enable = false
 long_side_length = 1920
 
 [sharpness]
