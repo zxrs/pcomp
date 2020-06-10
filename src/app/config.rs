@@ -4,8 +4,8 @@ use serde::Deserialize;
 pub struct Config {
     pub general: General,
     pub resize: Resize,
-    pub sharpness: Sharpness,
-    pub brightness: Brightness,
+    pub sharpen: Sharpen,
+    pub brighten: Brighten,
     pub contrast: Contrast,
 }
 
@@ -25,14 +25,14 @@ pub struct Resize {
 }
 
 #[derive(Deserialize)]
-pub struct Sharpness {
+pub struct Sharpen {
     pub enable: bool,
     pub sigma: f32,
     pub threshold: i32,
 }
 
 #[derive(Deserialize)]
-pub struct Brightness {
+pub struct Brighten {
     pub enable: bool,
     pub setting: i8,
 }

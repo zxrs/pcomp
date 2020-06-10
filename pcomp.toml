@@ -9,12 +9,12 @@ keep_original_exif = true
 enable = false
 long_side_length = 1920
 
-[sharpness]
+[sharpen]
 enable = false
 sigma = 2.0
 threshold = 10
 
-[brightness]
+[brighten]
 enable = false
 setting = 10    # -128 ~ 127
 

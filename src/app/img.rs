@@ -62,16 +62,16 @@ impl<'a> Img<'a> {
     }
 
     pub fn brighten(&mut self) {
-        if self.config.brightness.enable {
-            self.img = self.img.brighten(self.config.brightness.setting as i32);
+        if self.config.brighten.enable {
+            self.img = self.img.brighten(self.config.brighten.setting as i32);
         }
     }
 
     pub fn sharpen(&mut self) {
-        if self.config.sharpness.enable {
+        if self.config.sharpen.enable {
             self.img = self
                 .img
-                .unsharpen(self.config.sharpness.sigma, self.config.sharpness.threshold);
+                .unsharpen(self.config.sharpen.sigma, self.config.sharpen.threshold);
         }
     }
 
