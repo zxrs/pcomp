@@ -3,9 +3,10 @@ jpeg_quality = 70.0 # 0.0 ~ 100.0%
 read_sub_dir = true
 num_threads = 4
 overwrite_existing_files = true
+keep_original_exif = true
 
 [resize]
-enable = false
+enable = true
 long_side_length = 1920
 
 [sharpness]

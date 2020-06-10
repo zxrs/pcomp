@@ -1,10 +1,11 @@
 use super::Config;
 use anyhow::{anyhow, Result};
 use image::{self, imageops::FilterType, DynamicImage, GenericImageView, RgbImage};
-use mozjpeg::{ColorSpace, Compress, Decompress, ScanMode};
+use mozjpeg::{ColorSpace, Compress, Decompress, Marker, ScanMode, ALL_MARKERS};
 use std::fs;
 use std::io::{prelude::*, BufWriter};
 use std::path::Path;
+use std::ptr;
 
 pub struct Img<'a> {
     img: DynamicImage,
@@ -12,14 +13,22 @@ pub struct Img<'a> {
     path: &'a Path,
     buf: Vec<u8>,
     origin_size: usize,
+    markers: Vec<(Marker, Vec<u8>)>,
 }
 
 impl<'a> Img<'a> {
     pub fn open(config: &'a Config, path: &'a Path) -> Result<Self> {
-        let (data, width, height, origin_size) = {
+        let (data, width, height, origin_size, markers) = {
             let comp_data = fs::read(path)?;
             let origin_size = comp_data.len();
-            let mut d = Decompress::new_mem(&comp_data)?.rgb()?;
+            let d = Decompress::with_markers(ALL_MARKERS).from_mem(&comp_data)?;
+            let mut markers = vec![];
+            if config.general.keep_original_exif {
+                for marker in d.markers() {
+                    markers.push((marker.marker, marker.data.to_owned()));
+                }
+            }
+            let mut d = d.rgb()?;
             let width = d.width() as u32;
             let height = d.height() as u32;
             let data = d
@@ -30,11 +39,11 @@ impl<'a> Img<'a> {
                 .cloned()
                 .collect::<Vec<_>>();
             d.finish_decompress();
-            (data, width, height, origin_size)
+            (data, width, height, origin_size, markers)
         };
 
-        let image_buffer = RgbImage::from_raw(width, height, data)
-            .ok_or(anyhow!("RgbImage::from_raw is none"))?;
+        let image_buffer =
+            RgbImage::from_raw(width, height, data).ok_or(anyhow!("RgbImage::from_raw is none"))?;
         let img = DynamicImage::ImageRgb8(image_buffer);
 
         Ok(Img {
@@ -43,6 +52,7 @@ impl<'a> Img<'a> {
             path,
             buf: vec![],
             origin_size,
+            markers,
         })
     }
 
@@ -87,7 +97,9 @@ impl<'a> Img<'a> {
         comp.set_size(width, height);
         comp.set_mem_dest();
         comp.start_compress();
-
+        for (marker, data) in &self.markers {
+            comp.write_marker(marker.to_owned(), &data);
+        }
         let mut line = 0;
         loop {
             if line > height - 1 {
@@ -97,7 +109,6 @@ impl<'a> Img<'a> {
             line += 1;
         }
         comp.finish_compress();
-
         self.buf = comp
             .data_to_vec()
             .map_err(|_| anyhow!("data_to_vec failed"))?;

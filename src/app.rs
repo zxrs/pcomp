@@ -32,7 +32,7 @@ impl App {
             .build()?;
 
         pool.install(|| {
-            self.files.par_iter().for_each(|path| {
+            self.files.iter().for_each(|path| {
                 if let Some(file_name) = path.file_name() {
                     let file_name = file_name.to_string_lossy();
                     match self.process(path) {
@@ -53,7 +53,7 @@ impl App {
             if !ext.to_string_lossy().as_ref().to_lowercase().eq("jpg")
                 && !ext.to_string_lossy().as_ref().to_lowercase().eq("jpeg")
             {
-                bail!("not jpeg file.");
+                bail!("not jpeg file");
             }
         }
 
@@ -65,6 +65,7 @@ impl App {
         img.compress()?;
         let ratio = img.save()?;
         Ok(ratio)
+        //Ok(0)
     }
 }
 

@@ -15,6 +15,7 @@ pub struct General {
     pub num_threads: usize,
     pub read_sub_dir: bool,
     pub overwrite_existing_files: bool,
+    pub keep_original_exif: bool,
 }
 
 #[derive(Deserialize)]
