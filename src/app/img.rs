@@ -3,7 +3,6 @@ use anyhow::{anyhow, Result};
 use image::{self, imageops::FilterType, DynamicImage, GenericImageView, RgbImage};
 use mozjpeg::{ColorSpace, Compress, Decompress, Marker, ScanMode, ALL_MARKERS};
 use std::fs;
-use std::io::{prelude::*, BufWriter};
 use std::path::Path;
 
 pub struct Img<'a> {
@@ -126,8 +125,9 @@ impl<'a> Img<'a> {
             }
             compressed_dir.join(file_name)
         };
-        let mut file = BufWriter::new(fs::File::create(outfile)?);
-        file.write_all(&self.buf)?;
+        fs::write(&outfile, &self.buf)?;
+        // let mut file = BufWriter::new(fs::File::create(outfile)?);
+        // file.write_all(&self.buf)?;
 
         let ratio = (self.buf.len() as f32 / self.origin_size as f32 * 100.0) as u8;
         Ok(ratio)
